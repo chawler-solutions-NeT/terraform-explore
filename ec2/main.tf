@@ -32,48 +32,8 @@ resource "aws_instance" "apache-server" {
     Name = var.ec2_apache
   }
 
-
-
-
-  #Use file provisioner to copy index.html to /var/www/html
-  #  provisioner "file" {
-  #   source = "${path.module}/index_files/index.html"
-  #   destination = "/home/ec2-user/index.html"
-  # }
-
-  provisioner "remote-exec" {
-    script = "./tomcat.sh"
-    # inline = [
-    #     "sudo yum update -y",
-    #     "sudo yum install httpd -y",
-    #     "sudo cp /home/ec2-user/index.html /var/www/html/index.html",
-    #     "sudo systemctl start httpd",
-    #     "sudo systemctl enable httpd",       
-    # ]
-  }
-
-
-   #connection block is required for provisioner to work
-  connection {
-    type   = "ssh"
-    user   = "ec2-user"
-    private_key = file("~/keypair/devops")
-    host      = self.public_ip
-  }
-
 }
 
-
-############Creates a copy of the Instance AMI
-resource "aws_ami_from_instance" "apache_copy" {
-  name               = "apache-server-ami"
-  source_instance_id = aws_instance.apache-server.id
-  snapshot_without_reboot = true
-
-  tags = {
-    Name = "apache-server-ami"
-  }
-}
 
 # Creating key-pair on AWS using SSH-public key
 resource "aws_key_pair" "bash" {
@@ -83,7 +43,7 @@ resource "aws_key_pair" "bash" {
 
 
 resource "aws_security_group" "apache-server" {
-  name        = "apache-server-sg"
+  name        = var.apache_sg
   description = "Allow inbound traffic and all outbound traffic to Apache Server"
   vpc_id      = aws_vpc.csnet_vpc.id
 
@@ -108,7 +68,7 @@ resource "aws_security_group" "apache-server" {
   }
 
   tags = {
-    Name = "apache-server-sg"
+    Name = var.apache_sg
   }
 }
 

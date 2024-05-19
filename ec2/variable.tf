@@ -45,3 +45,9 @@ variable "ec2_apache" {
     type     = string
     default  = "apache-server"
 }
+
+variable "apache_sg" {
+    description = "The security group for apache"
+    type    = string
+    default = "apache-sg"      
+    }
