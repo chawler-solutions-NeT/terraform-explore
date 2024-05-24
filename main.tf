@@ -1,6 +1,6 @@
 #This block will create VPC
 resource "aws_vpc" "csnet_vpc" {
-  cidr_block       = var.vpc_cidr  
+  cidr_block       = var.cidr 
   instance_tenancy = var.instance_tenancy
 
   tags = {
@@ -11,56 +11,55 @@ resource "aws_vpc" "csnet_vpc" {
 #This code block will create subnet 1
 resource "aws_subnet" "public_sub_1" {
   vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = var.public_sub_1_cidr
-  availability_zone = var.us-east-1a
+  cidr_block = "10.100.1.0/24"
+  availability_zone = "us-east-1a"
 
   tags = {
-    Name = var.public-sub-1
+    Name = "public-sub-1"
   }
 }
 
 #This code block provisions public sub 2
 resource "aws_subnet" "public_sub_2" {
   vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = var.public_sub_2_cidr
-  availability_zone = var.us-east-1b
+  cidr_block = "10.100.2.0/24"
+  availability_zone = "us-east-1b"
 
   tags = {
-    Name = var.public-sub-2
+    Name = "public-sub-2"
   }
 }
 
 #This code block provisions private sub 1
 resource "aws_subnet" "private_sub_1" {
   vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = var.private_sub_1_cidr
-  availability_zone = var.us-east-1a
+  cidr_block = "10.100.3.0/24"
+  availability_zone = "us-east-1a"
   tags = {
-    Name = var.private-sub-1
+    Name = "private-sub-1"
   }
 }
 
 #This code block provisions private sub 2
 resource "aws_subnet" "private_sub_2" {
   vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = var.private_sub_2_cidr
-  availability_zone = var.us-east-1b
+  cidr_block = "10.100.4.0/24"
+  availability_zone = "us-east-1b"
   tags = {
-    Name = var.private-sub-2
+    Name = "private-sub-2"
   }
-
 }
 
 #This code block will provision private RTB
 resource "aws_route_table" "priv_rtb" {
   vpc_id = aws_vpc.csnet_vpc.id
   route {
-    cidr_block = var.priv_rtb_cidr
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.csnet_ngw.id
   }
 
   tags = {
-    Name = var.private_rtb
+    Name = "private-rtb"
   }
   lifecycle {
     ignore_changes = all
@@ -71,12 +70,12 @@ resource "aws_route_table" "priv_rtb" {
 resource "aws_route_table" "pub_rtb" {
   vpc_id = aws_vpc.csnet_vpc.id
   route {
-    cidr_block = var.pub_rtb_cidr
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.csnet_igw.id
   }
 
   tags = {
-    Name = var.public_rtb
+    Name = "public-rtb"
   }
 }
 
@@ -109,16 +108,16 @@ resource "aws_internet_gateway" "csnet_igw" {
   vpc_id = aws_vpc.csnet_vpc.id
 
   tags = {
-    Name = var.csnet-igw
+    Name = "csnet-igw"
   }
 }
 
 #Code to provision elastic IP
 resource "aws_eip" "csnet_eip" {
-  domain   = var.csnet-eip
+  domain   = "vpc"
 
   tags = {
-    Name = var.csnet-eip
+    Name = "csnet-eip"
   }
 }
 
@@ -128,7 +127,7 @@ resource "aws_nat_gateway" "csnet_ngw" {
   subnet_id     = aws_subnet.public_sub_1.id
 
   tags = {
-    Name = var.csnet-NAT
+    Name = "csnet-NAT"
   }
 
   depends_on = [aws_internet_gateway.csnet_igw]
