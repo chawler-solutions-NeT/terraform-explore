@@ -1,18 +1,16 @@
-## this block create variable for cidr
+##Block creates cidr block
 variable "vpc_cidr" {
-  description = "the ipv4 cidr for vpc"
+  description = "The IPv4 CIDR block for the VPC."
   type        = string
   default     = "10.0.0.0/16"
 }
 
-#
-## this block create instance tenancy
+##Block creates instance tenancy
 variable "instance_tenancy" {
-  description = "instance tenancy for vpc"
+  description = "instance tenency for our VPC"
   type        = string
   default     = "default"
 }
-
 
 ##this block create vpc tag
 variable "csnet-terraform-demo-vpc" {
@@ -21,46 +19,62 @@ variable "csnet-terraform-demo-vpc" {
     default  = "csnet-vpc"
 }
 
-##the block create public sub 1
+##The block create public sub 1
 variable "public_sub_1_cidr" {
   description = "A list of public subnets inside the VPC"
   type        = string
   default     = "10.100.1.0/24"
 }
 
-##this block create availabity zone for pub sub 1
+##Block creates availability zone for pub sub1
 variable "us-east-1a" {
-  description = "availability zone for us east 1"
+  description = "availabilty zone for pub sub 1"
   type = string
   default = "us-east-1a"
 }
 
-##this block create tag for pub sub 1
+##This block create tag for pub sub 1
 variable "public-sub-1" {
     description = "pub sub 1 tag"
     type     = string
     default  = "public-sub-1"
 }
 
-##the block create public sub 2
+##Block creates public sub2
 variable "public_sub_2_cidr" {
   description = "A list of public subnets inside the VPC"
   type        = string
   default     = "10.100.2.0/24"
 }
 
-##this block create tag for pub sub 2
+##Block creates availability zone for pub sub2
+variable "us-east-1b" {
+  description = "availabilty zone for pub sub 2"
+  type = string
+  default = "us-east-1b"
+}
+
+
+#Block create tag for pub sub2
 variable "public-sub-2" {
-    description = "pub sub 2 tag"
+    description = "public sub 2 tag"
     type     = string
     default  = "public-sub-2"
 }
 
-##the block create private sub 1
+##Block creates private sub1
 variable "private_sub_1_cidr" {
   description = "A list of private subnets inside the VPC"
   type        = string
   default     = "10.100.3.0/24"
+}
+
+
+#Block create tag for private sub1
+variable "private-sub-1" {
+    description = "private sub 1 tag"
+    type     = string
+    default  = "private-sub-1"
 }
 
 ##this block create availabity zone for pub sub 2
@@ -70,35 +84,27 @@ variable "us-east-1b" {
   default = "us-east-1b"
 }
 
-##this block create tag for private sub 1
-variable "private-sub-1" {
-    description = "pri sub 1 tag"
-    type     = string
-    default  = "private-sub-1"
-}
-
-##the block create private sub 2
+##Block creates private sub1
 variable "private_sub_2_cidr" {
   description = "A list of private subnets inside the VPC"
   type        = string
   default     = "10.100.4.0/24"
 }
 
-##this block create tag for private sub 2
+#Block create tag for private sub2
 variable "private-sub-2" {
-    description = "pri sub 2 tag"
+    description = "private sub 2 tag"
     type     = string
     default  = "private-sub-2"
 }
 
-##the block create private rtb
+##Block creates private rtb
 variable "priv_rtb_cidr" {
-  description = "A list of private rtb inside the VPC"
+  description = "A list of private rt inside the VPC"
   type        = string
   default     = "0.0.0.0/0"
 }
 
-#this block create tag for private rtb
 variable "private_rtb" {
     description = "pri rtb tag"
     type     = string
@@ -126,16 +132,16 @@ variable "csnet-igw" {
     default  = "csnet-igw"
 }
 
-##this block create eip for vpc
+## Block creates elastic ip for csnet vpc
 variable "csnet_eip" {
-  description = "eip for csnet vpc"
-  type        =string
-  default     ="vpc"
+  description = "elastic ip for csnet vpc"
+  type = string
+  default = "vpc"
 }
 
-#this block create tag for eip
+#Block create tag for vpc elastic IP
 variable "csnet-eip" {
-    description = "tag for vpc eip"
+    description = "tag for the vpc eip"
     type     = string
     default  = "csnet-eip"
 }
@@ -146,18 +152,4 @@ variable "csnet-NAT" {
     type     = string
     default  = "csnet-NAT"
 }
-
-
-
-
-
-
-
-
-  
-  
-  
-  
-  
-  
 
