@@ -4,7 +4,7 @@ resource "aws_vpc" "csnet_vpc" {
   instance_tenancy = var.instance_tenancy
 
   tags = {
-    Name = "csnet-terraform-demo-vpc"
+    Name = var.csnet-terraform-demo-vpc
   }
 }
 
