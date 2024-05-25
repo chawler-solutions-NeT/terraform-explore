@@ -48,6 +48,7 @@ resource "aws_subnet" "private_sub_2" {
   tags = {
     Name = var.private-sub-2
   }
+
 }
 
 #This code block will provision private RTB
@@ -59,7 +60,7 @@ resource "aws_route_table" "priv_rtb" {
   }
 
   tags = {
-    Name = var.priv_rtb
+    Name = var.private_rtb
   }
   lifecycle {
     ignore_changes = all
@@ -75,7 +76,7 @@ resource "aws_route_table" "pub_rtb" {
   }
 
   tags = {
-    Name = var.pub_rtb
+    Name = var.public_rtb
   }
 }
 
@@ -114,7 +115,7 @@ resource "aws_internet_gateway" "csnet_igw" {
 
 #Code to provision elastic IP
 resource "aws_eip" "csnet_eip" {
-  domain   = var.csnet_eip
+  domain   = var.csnet-eip
 
   tags = {
     Name = var.csnet-eip
