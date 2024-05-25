@@ -8,7 +8,7 @@ resource "aws_autoscaling_group" "apache-asg" {
   health_check_grace_period = 300
   health_check_type         = "ELB"
   force_delete              = true
-  vpc_zone_identifier       = [aws_subnet.public_sub_1.id, aws_subnet.public_sub_2.id]
+  vpc_zone_identifier       = [module.vpc_module.public_sub_1.id, module.vpc_module.public_sub_2.id]
     launch_template {
     id      = aws_launch_template.apache-lt.id
     version = "$Latest"

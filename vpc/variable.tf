@@ -77,13 +77,6 @@ variable "private-sub-1" {
     default  = "private-sub-1"
 }
 
-##this block create availabity zone for pub sub 2
-variable "us-east-1b" {
-  description = "availability zone for us east 1 b"
-  type = string
-  default = "us-east-1b"
-}
-
 ##Block creates private sub1
 variable "private_sub_2_cidr" {
   description = "A list of private subnets inside the VPC"

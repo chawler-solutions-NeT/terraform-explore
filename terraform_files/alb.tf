@@ -46,7 +46,7 @@ resource "aws_lb_listener" "alb-http-listener" {
 resource "aws_security_group" "alb-sg" {
   name        = "apache-alb-sg"
   description = "Allow inbound traffic on port 80 & 443"
-  vpc_id      = aws_vpc.csnet_vpc.id
+  vpc_id      = module.vpc_module.vpc_id
    ingress {
     description      = "http port"
     from_port        = 80
