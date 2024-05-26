@@ -38,7 +38,7 @@ resource "aws_launch_template" "apache-lt" {
 
   network_interfaces {
     associate_public_ip_address = true
-    subnet_id = aws_subnet.public_sub_1.id
+    subnet_id = module.vpc_module.public_sub_1.id
     security_groups = [aws_security_group.apache-server.id]
   }
 
