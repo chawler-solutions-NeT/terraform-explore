@@ -4,7 +4,7 @@ resource "aws_lb" "apache-lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb-sg.id]
-  subnets            = [aws_subnet.public_sub_1.id, aws_subnet.public_sub_2.id]
+  subnets            = [module.vpc_module.public_sub_1.id,module.vpc_module.public_sub_2.id]
   enable_deletion_protection = false
   tags = {
     Name = "apache-lb"
