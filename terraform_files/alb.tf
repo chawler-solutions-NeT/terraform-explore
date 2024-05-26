@@ -4,7 +4,7 @@ resource "aws_lb" "apache-lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb-sg.id]
-  subnets            = [module.vpc_module.public_sub_1.id,module.vpc_module.public_sub_2.id]
+  subnets            = [module.vpc_module.public_sub_1, module.vpc_module.public_sub_2]
   enable_deletion_protection = false
   tags = {
     Name = "apache-lb"
@@ -17,7 +17,7 @@ resource "aws_lb_listener" "alb-https-listener" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.cert.arn
+  certificate_arn   = module.acm.certificate_arn
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.apache-lb-tg.arn

@@ -12,12 +12,8 @@ resource "aws_launch_template" "apache-lt" {
     }
   }
 
-  image_id = aws_ami_from_instance.apache_copy.id
-  user_data = "${base64encode(<<-EOF
-              #!/bin/bash
-              sudo nohup java -jar /opt/tomcat9/webapps/spring-petclinic-2.4.2.war &
-              EOF
-          )}"
+  image_id = module.ec2_module.ami_from_instance
+
   instance_initiated_shutdown_behavior = "terminate"
 
   instance_market_options {
@@ -38,8 +34,8 @@ resource "aws_launch_template" "apache-lt" {
 
   network_interfaces {
     associate_public_ip_address = true
-    subnet_id = module.vpc_module.public_sub_1.id
-    security_groups = [aws_security_group.apache-server.id]
+    subnet_id = module.vpc_module.public_sub_1
+    security_groups = [module.ec2_module.security_group_id]
   }
 
 

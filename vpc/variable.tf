@@ -73,21 +73,18 @@ variable "private_sub_1_cidr" {
 #Block create tag for private sub1
 variable "private-sub-1" {
     description = "private sub 1 tag"
-    type     = string
     default  = "private-sub-1"
 }
 
 ##Block creates private sub1
 variable "private_sub_2_cidr" {
   description = "A list of private subnets inside the VPC"
-  type        = string
   default     = "10.100.4.0/24"
 }
 
 #Block create tag for private sub2
 variable "private-sub-2" {
     description = "private sub 2 tag"
-    type     = string
     default  = "private-sub-2"
 }
 
