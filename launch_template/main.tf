@@ -12,7 +12,7 @@ resource "aws_launch_template" "apache-lt" {
     }
   }
 
-  image_id = module.ec2_module.ami_from_instance
+  image_id = var.image_id
 
   instance_initiated_shutdown_behavior = "terminate"
 
@@ -21,7 +21,7 @@ resource "aws_launch_template" "apache-lt" {
   }
 
   instance_type = var.instance_type
-  key_name = aws_key_pair.bash.key_name
+  key_name = var.key_pair
   metadata_options {
     http_endpoint               = var.http_endpoint
     http_tokens                 = var.http_tokens
@@ -34,8 +34,8 @@ resource "aws_launch_template" "apache-lt" {
 
   network_interfaces {
     associate_public_ip_address = var.associate_public_ip_address
-    subnet_id = module.vpc_module.public_sub_1
-    security_groups = [module.ec2_module.security_group_id]
+    subnet_id = var.subnet_id
+    security_groups = [var.security_groups]
   }
 
 

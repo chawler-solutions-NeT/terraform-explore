@@ -1,5 +1,5 @@
 ##this block create name for apache LB
-variable "name" {
+variable "apache_alb_name" {
  description = "name for apache LB"
  type   =   string
  default = "apache-lb"        
@@ -16,7 +16,7 @@ variable "internal" {
 variable "load_balancer_type" {
  description = "load balancer type for apache LB"
  type   =   string
- default = application       
+ default = "application"       
 }
 
 ##this block create deletion protection for apache LB
@@ -27,14 +27,14 @@ variable "enable_deletion_protection" {
 }
 
 ##this block create the port number for apache LB
-variable "port" {
+variable "https_port" {
  description = "port number for apache LB"
  type   =   number
  default = 443       
 }
 
 ##this block create the protocol for apache LB
-variable "protocol" {
+variable "https_protocol" {
  description = "protocol for apache LB"
  type   =   string
  default = "HTTPS"      
@@ -48,28 +48,28 @@ variable "ssl_policy" {
 }
 
 ##this block create default action for apache LB
-variable "type" {
+variable "https_action_type" {
  description = "default action type for apache LB"
  type   =   string
  default =  "forward"     
 }
 
 ##this block create the port number for apache LB listener
-variable "port" {
+variable "http_port" {
  description = "port number for apache LB listener"
  type   =   number
  default = 80       
 }
 
 ##this block create the protocol for apache LB listener
-variable "protocol" {
+variable "http_protocol" {
  description = "protocol for apache LB listener"
  type   =   string
  default = "HTTP"      
 }
 
 ##this block create default action for apache LB listener
-variable "type" {
+variable "http_action_type" {
  description = "default action type for apache LB listener"
  type   =   string
  default =  "redirect"     
@@ -82,36 +82,29 @@ variable "status_code" {
  default =   "HTTP_301"    
 }
 
-##this block create status code for apache LB listener
-variable "status_code" {
- description = "status code for alb listener"
- type   =   string
- default =   "HTTP_301"    
-}
-
 ##this block create host for apache LB listener
-variable "host" {
+variable "ref_host" {
  description = "host for alb listener"
  type   =   string
  default =  "#{host}"     
 }
 
 ##this block create host for apache LB listener
-variable "path" {
+variable "ref_host_path" {
  description = "path for alb listener"
  type   =   string
  default = "/#{path}"      
 }
 
 ##this block create query for apache LB listener
-variable "query" {
+variable "path_query" {
  description = "query for alb listener"
  type   =   string
  default =  "#{query}"     
 }
 
 ##this block create security group for apache LB 
-variable "name" {
+variable "alb_securitygroup_name" {
  description = "name for security group for alb"
  type   =   string
  default =   "apache-alb-sg"   
@@ -136,4 +129,24 @@ variable "name" {
  description = "name for alb sg"
  type   =   string
  default =  "apache-alb-sg"
+}
+
+variable "public_sub_1" {
+  description = "Public Subnet 1 from the VPC module"
+}
+
+variable "public_sub_2" {
+  description = "Public Subnet 2 from the VPC module"
+}
+
+variable "acm_certificate_arn" {
+  description = "The certificate ARN from certificate Manager"
+}
+
+variable "target_group_arn" {
+  description = "The target group ARN from the target group Module"
+}
+
+variable "vpc_id" {
+  description = "VPC ID value from the VPC module"
 }

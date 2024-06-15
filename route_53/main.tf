@@ -1,11 +1,11 @@
 resource "aws_route53_record" "apache-record" {
   zone_id = data.aws_route53_zone.apache-domain.zone_id
-  name    = "*.${var.domain_name}"
-  type    = "A"
+  name    = "www.${var.domain_name}"
+  type    = var.record_type
   alias {
-    name = aws_lb.apache-lb.dns_name
-    zone_id = aws_lb.apache-lb.zone_id
-    evaluate_target_health = true
+    name                    = var.aws_lb_name
+    zone_id                 = var.aws_zone_id
+    evaluate_target_health  = var.evaluate_target_health
   }
 }
 
@@ -20,14 +20,14 @@ data "aws_route53_zone" "apache-domain" {
 
 resource "aws_route53_record" "apache-domain" {
   for_each = {
-    for dvo in module.acm.validation_option : dvo.domain_name => {
+    for dvo in var.validation_option : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
   }
 
-  allow_overwrite = var.overwrite_option
+  allow_overwrite = var.route_53_overwrite_option
   name            = each.value.name
   records         = [each.value.record]
   ttl             = var.time_to_live

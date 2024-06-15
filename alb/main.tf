@@ -1,52 +1,52 @@
 #Create an ALB
 resource "aws_lb" "apache-lb" {
-  name               = var.name
+  name               = var.apache_alb_name
   internal           = var.internal
   load_balancer_type = var.load_balancer_type
   security_groups    = [aws_security_group.alb-sg.id]
-  subnets            = [module.vpc_module.public_sub_1, module.vpc_module.public_sub_2]
+  subnets            = [var.public_sub_1, var.public_sub_2]
   enable_deletion_protection = var.enable_deletion_protection
   tags = {
-    Name = var.name
+    Name = var.apache_alb_name
   }
 }
 
 #Create ALB listener on port 443
 resource "aws_lb_listener" "alb-https-listener" {
   load_balancer_arn = aws_lb.apache-lb.arn
-  port              = var.port
-  protocol          = var.protocol
+  port              = var.https_port
+  protocol          = var.https_protocol
   ssl_policy        = var.ssl_policy
-  certificate_arn   = module.acm.certificate_arn
+  certificate_arn   = var.acm_certificate_arn
   default_action {
-    type             = var.type
-    target_group_arn = aws_lb_target_group.apache-lb-tg.arn
+    type             = var.https_action_type
+    target_group_arn = var.target_group_arn
   }
 }
 
 #Create ALB listener on port 80
 resource "aws_lb_listener" "alb-http-listener" {
   load_balancer_arn = aws_lb.apache-lb.arn
-  port              = var.port
-  protocol          = var.protocol
+  port              = var.http_port
+  protocol          = var.http_protocol
   default_action {
-    type = var.type
+    type = var.http_action_type
     redirect {
-      port        = var.port
-      protocol    = var.protocol
+      port        = var.http_port
+      protocol    = var.http_protocol
       status_code = var.status_code
-      host        = var.host
-      path        = var.path
-      query       = var.query
+      host        = var.ref_host
+      path        = var.ref_host_path
+      query       = var.path_query
     }
   }
 }
 
 ##################################################################
 resource "aws_security_group" "alb-sg" {
-  name        = var.name
+  name        = var.alb_securitygroup_name
   description = "Allow inbound traffic on port 80 & 443"
-  vpc_id      = module.vpc_module.vpc_id
+  vpc_id      = var.vpc_id
    ingress {
     description      = var.description
     from_port        = 80
@@ -71,7 +71,7 @@ resource "aws_security_group" "alb-sg" {
   }
 
   tags = {
-    Name = var.name
+    Name = var.alb_securitygroup_name
   }
 }
 

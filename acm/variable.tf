@@ -22,5 +22,5 @@ variable "domain_name" {
 }
 
 variable "route53_record" {
-  description = "Route53 record of the domain"
+  description = "List of Route 53 records with fqdn attribute"
 }

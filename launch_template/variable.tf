@@ -82,10 +82,18 @@ variable "resource_type" {
   default = "instance"
 }
 
-##this block create name for apache launch temp
+variable "image_id" {
+  description = "Launch template AMI"
+}
 
-variable "name" {
-  description = "tag for apache launch templ"
-  type = string
-  default = "apache-lt"
+variable "subnet_id" {
+  description = "vpc subnet 1"
+}
+
+variable "security_groups" {
+  description = "security groups id"
+}
+
+variable "key_pair" {
+  description = "value of the keypair attached to the Instance"
 }

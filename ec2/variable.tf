@@ -60,6 +60,8 @@ variable "vpc_cidr_block" {
     description = "CIDR block of the VPC ID"
 }
 
-variable "public_sub1" {}
+variable "public_sub1" {
+    description = "The public subnet from the VPC"
+}
 
 variable "key_name" {}

@@ -6,14 +6,14 @@ variable "name" {
 }
 
 ##this block create port for apache LB tg
-variable "port" {
+variable "target_group_port" {
  description = "port for alb tg"
  type   =   number
  default = 8080 
 }
 
 ##this block create protocol for apache LB tg
-variable "protocol" {
+variable "http_protocol" {
  description = "protocol for alb tg"
  type   =   string
  default = "HTTP"
@@ -47,7 +47,6 @@ variable "unhealthy_threshold" {
  default = 2
 }
 
-
 #this block create healthy check path for apache LB tg
 variable "path" {
  description = "health check for alb tg"
@@ -56,15 +55,12 @@ variable "path" {
 }
 
 #this block create healthy check port for apache LB tg
-variable "port" {
+variable "http_port" {
  description = "health check port for alb tg"
  type   =   string
  default ="8080"
 }
 
-#this block create healthy check protocol for apache LB tg
-variable "protocol" {
- description = "health check protocol for alb tg"
- type   =   string
- default =   "HTTP"
+variable "vpc_id" {
+  description = "VPC ID from the VPC module"
 }
