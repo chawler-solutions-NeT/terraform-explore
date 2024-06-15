@@ -5,3 +5,15 @@ output "public_ip_address" {
 output "instance_dns" {
   value = aws_instance.apache-server.public_dns
 }
+
+output "instance_id" {
+  value = aws_instance.apache-server.id
+}
+
+output "ami_from_instance" {
+  value = aws_ami_from_instance.apache_copy.id
+}
+
+output "security_group_id" {
+  value = aws_security_group.apache-server.id
+}

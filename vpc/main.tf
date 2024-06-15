@@ -115,7 +115,7 @@ resource "aws_internet_gateway" "csnet_igw" {
 
 #Code to provision elastic IP
 resource "aws_eip" "csnet_eip" {
-  domain   = var.csnet-eip
+  domain   = var.csnet_eip
 
   tags = {
     Name = var.csnet-eip

@@ -73,28 +73,18 @@ variable "private_sub_1_cidr" {
 #Block create tag for private sub1
 variable "private-sub-1" {
     description = "private sub 1 tag"
-    type     = string
     default  = "private-sub-1"
-}
-
-##this block create availabity zone for pub sub 2
-variable "us-east-1b" {
-  description = "availability zone for us east 1 b"
-  type = string
-  default = "us-east-1b"
 }
 
 ##Block creates private sub1
 variable "private_sub_2_cidr" {
   description = "A list of private subnets inside the VPC"
-  type        = string
   default     = "10.100.4.0/24"
 }
 
 #Block create tag for private sub2
 variable "private-sub-2" {
     description = "private sub 2 tag"
-    type     = string
     default  = "private-sub-2"
 }
 

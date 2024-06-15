@@ -1,143 +1,61 @@
 module "ec2_module" {
   source = "../ec2"
+  vpc_id = module.vpc_module.vpc_id
+  vpc_cidr_block = module.vpc_module.vpc_cidr_block
+  public_sub1 = module.vpc_module.public_sub_1
+  key_name    = aws_key_pair.bash.key_name
 }
 
 module "vpc_module" {
   source = "../vpc"
 }
 
-
-#This block will create VPC
-resource "aws_vpc" "csnet_vpc" {
-  cidr_block       = "10.100.0.0/16"  
-  instance_tenancy = "default"
-
-  tags = {
-    Name = "csnet-terraform-demo-vpc"
-  }
+module "acm" {
+  source = "../acm"
+  domain_name = module.route_53.route53_record_name
+  route53_record = module.route_53.route53_record_fqdn
 }
 
-#This code block will create subnet 1
-resource "aws_subnet" "public_sub_1" {
-  vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = "10.100.1.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name = "public-sub-1"
-  }
+module "auto_scaling" {
+  source = "../auto_scaling"
+  target_groups_arn   = module.target_group.target_group_arn
+  public_sub_1        = module.vpc_module.public_sub_1
+  public_sub_2        = module.vpc_module.public_sub_2
+  launch_template_id  = module.launch_template.launch_template_id
+  lb_target_group     = module.target_group.target_group_id
 }
 
-#This code block provisions public sub 2
-resource "aws_subnet" "public_sub_2" {
-  vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = "10.100.2.0/24"
-  availability_zone = "us-east-1b"
-
-  tags = {
-    Name = "public-sub-2"
-  }
+module "alb" {
+  source              = "../alb"
+  public_sub_1        = module.vpc_module.public_sub_1
+  public_sub_2        = module.vpc_module.public_sub_2
+  acm_certificate_arn = module.acm.certificate_arn
+  target_group_arn    = module.target_group.target_group_arn
+  vpc_id              = module.vpc_module.vpc_id
 }
 
-#This code block provisions private sub 1
-resource "aws_subnet" "private_sub_1" {
-  vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = "10.100.3.0/24"
-  availability_zone = "us-east-1a"
-  tags = {
-    Name = "private-sub-1"
-  }
+module "route_53" {
+  source = "../route_53"
+  aws_lb_name = module.alb.aws_alb_name
+  aws_zone_id = module.alb.aws_alb_name
+  validation_option = module.acm.validation_option
 }
 
-#This code block provisions private sub 2
-resource "aws_subnet" "private_sub_2" {
-  vpc_id     = aws_vpc.csnet_vpc.id
-  cidr_block = "10.100.4.0/24"
-  availability_zone = "us-east-1b"
-  tags = {
-    Name = "private-sub-2"
-  }
+module "target_group" {
+  source = "../target_group"
+  vpc_id = module.vpc_module.vpc_id
 }
 
-#This code block will provision private RTB
-resource "aws_route_table" "priv_rtb" {
-  vpc_id = aws_vpc.csnet_vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.csnet_ngw.id
-  }
-
-  tags = {
-    Name = "private-rtb"
-  }
-  lifecycle {
-    ignore_changes = all
-  }
+module "launch_template" {
+  source = "../launch_template"
+  image_id = module.ec2_module.ami_from_instance
+  subnet_id = module.vpc_module.public_sub_1
+  security_groups = module.ec2_module.security_group_id
+  key_pair = aws_key_pair.bash.key_name
 }
 
-#This code block will provision public RTB
-resource "aws_route_table" "pub_rtb" {
-  vpc_id = aws_vpc.csnet_vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.csnet_igw.id
-  }
-
-  tags = {
-    Name = "public-rtb"
-  }
-}
-
-#Route table association of public sub 1
-resource "aws_route_table_association" "public_sub_1" {
-  subnet_id      = aws_subnet.public_sub_1.id
-  route_table_id = aws_route_table.pub_rtb.id
-}
-
-#Route table association of public sub 2
-resource "aws_route_table_association" "public_sub_2" {
-  subnet_id      = aws_subnet.public_sub_2.id
-  route_table_id = aws_route_table.pub_rtb.id
-}
-
-#Route table association of private sub 1
-resource "aws_route_table_association" "private_sub_1" {
-  subnet_id      = aws_subnet.private_sub_1.id
-  route_table_id = aws_route_table.priv_rtb.id
-}
-
-#Route table association of private sub 2
-resource "aws_route_table_association" "private_sub_2" {
-  subnet_id      = aws_subnet.private_sub_2.id
-  route_table_id = aws_route_table.priv_rtb.id
-}
-
-#Code to provision internet gateway
-resource "aws_internet_gateway" "csnet_igw" {
-  vpc_id = aws_vpc.csnet_vpc.id
-
-  tags = {
-    Name = "csnet-igw"
-  }
-}
-
-#Code to provision elastic IP
-resource "aws_eip" "csnet_eip" {
-  domain   = "vpc"
-
-  tags = {
-    Name = "csnet-eip"
-  }
-}
-
-#Code block to provision nat gatway
-resource "aws_nat_gateway" "csnet_ngw" {
-  allocation_id = aws_eip.csnet_eip.id
-  subnet_id     = aws_subnet.public_sub_1.id
-
-  tags = {
-    Name = "csnet-NAT"
-  }
-
-  depends_on = [aws_internet_gateway.csnet_igw]
+# Creating key-pair on AWS using SSH-public key
+resource "aws_key_pair" "bash" {
+  key_name   = "bash"
+  public_key = file("~/keypair/devops.pub")
 }

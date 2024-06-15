@@ -4,13 +4,13 @@
 #provisioner: file, remote-exec, local-exec (requires connection block)
 
 resource "aws_instance" "apache-server" {
-  ami           = var.ami
-  instance_type = var.instance_type
-  key_name      =  aws_key_pair.bash.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
-  vpc_security_group_ids = [aws_security_group.apache-server.id]
-  associate_public_ip_address = var.associate_public_ip
-  subnet_id         = aws_subnet.public_sub_1.id
-  iam_instance_profile = var.instance_profile
+  ami                             = var.ami
+  instance_type                   = var.instance_type
+  key_name                        = var.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
+  vpc_security_group_ids          = [aws_security_group.apache-server.id]
+  associate_public_ip_address     = var.associate_public_ip
+  subnet_id                       = var.public_sub1
+  iam_instance_profile            = var.instance_profile
   instance_market_options {
     spot_options {
       max_price = 0.0400
@@ -34,25 +34,28 @@ resource "aws_instance" "apache-server" {
 
 }
 
+############Creates a copy of the Instance AMI
+resource "aws_ami_from_instance" "apache_copy" {
+  name               = "apache-server-ami"
+  source_instance_id = aws_instance.apache-server.id
+  snapshot_without_reboot = true
 
-# Creating key-pair on AWS using SSH-public key
-resource "aws_key_pair" "bash" {
-  key_name   = "bash"
-  public_key = file("~/keypair/devops.pub")
+  tags = {
+    Name = "apache-server-ami"
+  }
 }
-
 
 resource "aws_security_group" "apache-server" {
   name        = var.apache_sg
   description = "Allow inbound traffic and all outbound traffic to Apache Server"
-  vpc_id      = aws_vpc.csnet_vpc.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description      = "ssh port"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
-    cidr_blocks      = [aws_vpc.csnet_vpc.cidr_block]
+    cidr_blocks      = [var.vpc_cidr_block]
     self              = true
 
   }

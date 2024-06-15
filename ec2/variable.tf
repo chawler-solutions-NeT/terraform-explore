@@ -51,3 +51,17 @@ variable "apache_sg" {
     type    = string
     default = "apache-sg"      
     }
+
+variable "vpc_id" {
+    description = "VPC ID for the network"
+}
+
+variable "vpc_cidr_block" {
+    description = "CIDR block of the VPC ID"
+}
+
+variable "public_sub1" {
+    description = "The public subnet from the VPC"
+}
+
+variable "key_name" {}

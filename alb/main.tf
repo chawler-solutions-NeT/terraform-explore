@@ -1,57 +1,57 @@
 #Create an ALB
 resource "aws_lb" "apache-lb" {
-  name               = "apache-lb"
-  internal           = false
-  load_balancer_type = "application"
+  name               = var.apache_alb_name
+  internal           = var.internal
+  load_balancer_type = var.load_balancer_type
   security_groups    = [aws_security_group.alb-sg.id]
-  subnets            = [aws_subnet.public_sub_1.id, aws_subnet.public_sub_2.id]
-  enable_deletion_protection = false
+  subnets            = [var.public_sub_1, var.public_sub_2]
+  enable_deletion_protection = var.enable_deletion_protection
   tags = {
-    Name = "apache-lb"
+    Name = var.apache_alb_name
   }
 }
 
 #Create ALB listener on port 443
 resource "aws_lb_listener" "alb-https-listener" {
   load_balancer_arn = aws_lb.apache-lb.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.cert.arn
+  port              = var.https_port
+  protocol          = var.https_protocol
+  ssl_policy        = var.ssl_policy
+  certificate_arn   = var.acm_certificate_arn
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.apache-lb-tg.arn
+    type             = var.https_action_type
+    target_group_arn = var.target_group_arn
   }
 }
 
 #Create ALB listener on port 80
 resource "aws_lb_listener" "alb-http-listener" {
   load_balancer_arn = aws_lb.apache-lb.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = var.http_port
+  protocol          = var.http_protocol
   default_action {
-    type = "redirect"
+    type = var.http_action_type
     redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-      host        = "#{host}"
-      path        = "/#{path}"
-      query       = "#{query}"
+      port        = var.http_port
+      protocol    = var.http_protocol
+      status_code = var.status_code
+      host        = var.ref_host
+      path        = var.ref_host_path
+      query       = var.path_query
     }
   }
 }
 
 ##################################################################
 resource "aws_security_group" "alb-sg" {
-  name        = "apache-alb-sg"
+  name        = var.alb_securitygroup_name
   description = "Allow inbound traffic on port 80 & 443"
-  vpc_id      = aws_vpc.csnet_vpc.id
+  vpc_id      = var.vpc_id
    ingress {
-    description      = "http port"
+    description      = var.description
     from_port        = 80
     to_port          = 80
-    protocol         = "tcp"
+    protocol         = var.protocol
     cidr_blocks      = ["0.0.0.0/0"]
   }
   ingress {
@@ -71,7 +71,7 @@ resource "aws_security_group" "alb-sg" {
   }
 
   tags = {
-    Name = "apache-alb-sg"
+    Name = var.alb_securitygroup_name
   }
 }
 
