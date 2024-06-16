@@ -65,3 +65,7 @@ variable "public_sub1" {
 }
 
 variable "key_name" {}
+
+variable "environment" {
+  description = "Name of the specific environment"
+}

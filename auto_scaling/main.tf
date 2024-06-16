@@ -1,6 +1,6 @@
 #Code block to deploy autoscaling group
 resource "aws_autoscaling_group" "apache-asg" {
-  name                      = var.apache-asg
+  name                      = "${var.environment}-${var.apache-asg}" // sand-apache-sg
   max_size                  = var.max_size
   desired_capacity          = var.desired_capacity
   min_size                  = var.min_size
@@ -16,7 +16,7 @@ resource "aws_autoscaling_group" "apache-asg" {
 
   tag {
     key                 = "Name"
-    value               = var.apache-asg
+    value               = "${var.environment}-${var.apache-asg}"
     propagate_at_launch = true
   }
 

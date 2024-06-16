@@ -1,5 +1,5 @@
 resource "aws_lb_target_group" "apache-lb-tg" {
-  name        = var.name
+  name        = "${var.environment}-${var.name}"
   port        = var.target_group_port
   protocol    = var.http_protocol
   vpc_id      = var.vpc_id

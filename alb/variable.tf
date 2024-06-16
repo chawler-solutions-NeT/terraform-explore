@@ -150,3 +150,7 @@ variable "target_group_arn" {
 variable "vpc_id" {
   description = "VPC ID value from the VPC module"
 }
+
+variable "environment" {
+  description = "Name of the specific environment"
+}

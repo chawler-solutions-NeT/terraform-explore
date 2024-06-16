@@ -1,6 +1,6 @@
 resource "aws_route53_record" "apache-record" {
   zone_id = data.aws_route53_zone.apache-domain.zone_id
-  name    = "www.${var.domain_name}"
+  name    = "${var.environment}.${var.domain_name}"
   type    = var.record_type
   alias {
     name                    = var.aws_lb_name

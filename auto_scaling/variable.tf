@@ -40,6 +40,10 @@ variable "force_delete" {
     default = "true"
 }
 
+variable "environment" {
+  description = "Name of the specific environment"
+}
+
 variable "target_groups_arn" {}
 variable "public_sub_1" {}
 variable "public_sub_2" {}

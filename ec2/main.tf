@@ -29,7 +29,7 @@ resource "aws_instance" "apache-server" {
         volume_type = var.block_type
     }
   tags = {
-    Name = var.ec2_apache
+    Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
   }
 
 }
@@ -41,7 +41,7 @@ resource "aws_ami_from_instance" "apache_copy" {
   snapshot_without_reboot = true
 
   tags = {
-    Name = "apache-server-ami"
+    Name = "${var.environment}-apache-server-ami" // sand-apache-server-ami
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_security_group" "apache-server" {
   }
 
   tags = {
-    Name = var.apache_sg
+    Name = "${var.environment}-${var.apache_sg}"
   }
 }
 

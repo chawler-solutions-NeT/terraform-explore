@@ -1,13 +1,13 @@
 #Create an ALB
 resource "aws_lb" "apache-lb" {
-  name               = var.apache_alb_name
+  name               = "${var.environment}-${var.apache_alb_name}"
   internal           = var.internal
   load_balancer_type = var.load_balancer_type
   security_groups    = [aws_security_group.alb-sg.id]
   subnets            = [var.public_sub_1, var.public_sub_2]
   enable_deletion_protection = var.enable_deletion_protection
   tags = {
-    Name = var.apache_alb_name
+    Name = "${var.environment}-${var.apache_alb_name}"
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_security_group" "alb-sg" {
   }
 
   tags = {
-    Name = var.alb_securitygroup_name
+    Name = "${var.environment}-${var.alb_securitygroup_name}"
   }
 }
 

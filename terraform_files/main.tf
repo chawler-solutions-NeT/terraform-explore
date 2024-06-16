@@ -4,16 +4,19 @@ module "ec2_module" {
   vpc_cidr_block = module.vpc_module.vpc_cidr_block
   public_sub1 = module.vpc_module.public_sub_1
   key_name    = aws_key_pair.bash.key_name
+  environment = "dev"
 }
 
 module "vpc_module" {
   source = "../vpc"
+  environment = "dev"
 }
 
 module "acm" {
   source = "../acm"
   domain_name = module.route_53.route53_record_name
   route53_record = module.route_53.route53_record_fqdn
+  environment = "dev"
 }
 
 module "auto_scaling" {
@@ -23,6 +26,7 @@ module "auto_scaling" {
   public_sub_2        = module.vpc_module.public_sub_2
   launch_template_id  = module.launch_template.launch_template_id
   lb_target_group     = module.target_group.target_group_id
+  environment = "dev"
 }
 
 module "alb" {
@@ -32,6 +36,7 @@ module "alb" {
   acm_certificate_arn = module.acm.certificate_arn
   target_group_arn    = module.target_group.target_group_arn
   vpc_id              = module.vpc_module.vpc_id
+  environment = "dev"
 }
 
 module "route_53" {
@@ -39,11 +44,13 @@ module "route_53" {
   aws_lb_name = module.alb.aws_alb_name
   aws_zone_id = module.alb.aws_alb_name
   validation_option = module.acm.validation_option
+  environment = "dev"
 }
 
 module "target_group" {
   source = "../target_group"
   vpc_id = module.vpc_module.vpc_id
+  environment = "dev"
 }
 
 module "launch_template" {
@@ -52,6 +59,7 @@ module "launch_template" {
   subnet_id = module.vpc_module.public_sub_1
   security_groups = module.ec2_module.security_group_id
   key_pair = aws_key_pair.bash.key_name
+  environment = "dev"
 }
 
 # Creating key-pair on AWS using SSH-public key

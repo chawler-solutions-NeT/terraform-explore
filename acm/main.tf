@@ -4,7 +4,7 @@ resource "aws_acm_certificate" "cert" {
   key_algorithm     = var.key_algorithm
 
   tags = {
-    Name = var.domain_tag_name
+    Name = "${var.environment}-${var.domain_tag_name}" // sand-csnet
   }
 
   lifecycle {

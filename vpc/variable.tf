@@ -2,7 +2,7 @@
 variable "vpc_cidr" {
   description = "The IPv4 CIDR block for the VPC."
   type        = string
-  default     = "10.0.0.0/16"
+  default     = "10.100.0.0/16"
 }
 
 ##Block creates instance tenancy
@@ -13,7 +13,7 @@ variable "instance_tenancy" {
 }
 
 ##this block create vpc tag
-variable "csnet-terraform-demo-vpc" {
+variable "csnet-vpc" {
     description = "vpc name"
     type     = string
     default  = "csnet-vpc"
@@ -143,3 +143,6 @@ variable "csnet-NAT" {
     default  = "csnet-NAT"
 }
 
+variable "environment" {
+  description = "Name of the specific environment"
+}

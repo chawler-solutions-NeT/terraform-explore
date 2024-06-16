@@ -1,5 +1,5 @@
 resource "aws_launch_template" "apache-lt" {
-  name = var.name
+  name = "${var.environment}-${var.name}"
   iam_instance_profile {
     name = var.instance_profile
   }
@@ -43,7 +43,7 @@ resource "aws_launch_template" "apache-lt" {
     resource_type = var.resource_type
 
     tags = {
-      Name = var.name
+      Name = "${var.environment}-${var.name}"
     }
   }
 

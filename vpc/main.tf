@@ -4,7 +4,7 @@ resource "aws_vpc" "csnet_vpc" {
   instance_tenancy = var.instance_tenancy
 
   tags = {
-    Name = var.csnet-terraform-demo-vpc
+    Name = "${var.environment}-${var.csnet-vpc}"
   }
 }
 
@@ -15,7 +15,7 @@ resource "aws_subnet" "public_sub_1" {
   availability_zone = var.us-east-1a
 
   tags = {
-    Name = var.public-sub-1
+    Name = "${var.environment}-${var.public-sub-1}"
   }
 }
 
@@ -26,7 +26,7 @@ resource "aws_subnet" "public_sub_2" {
   availability_zone = var.us-east-1b
 
   tags = {
-    Name = var.public-sub-2
+    Name = "${var.environment}-${var.public-sub-2}"
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_subnet" "private_sub_1" {
   cidr_block = var.private_sub_1_cidr
   availability_zone = var.us-east-1a
   tags = {
-    Name = var.private-sub-1
+    Name = "${var.environment}-${var.private-sub-1}"
   }
 }
 
@@ -46,7 +46,7 @@ resource "aws_subnet" "private_sub_2" {
   cidr_block = var.private_sub_2_cidr
   availability_zone = var.us-east-1b
   tags = {
-    Name = var.private-sub-2
+    Name = "${var.environment}-${var.private-sub-2}"
   }
 
 }
@@ -59,11 +59,12 @@ resource "aws_route_table" "priv_rtb" {
     gateway_id = aws_nat_gateway.csnet_ngw.id
   }
 
-  tags = {
-    Name = var.private_rtb
-  }
   lifecycle {
     ignore_changes = all
+  }
+
+  tags = {
+    Name = "${var.environment}-${var.private_rtb}"
   }
 }
 
@@ -74,9 +75,8 @@ resource "aws_route_table" "pub_rtb" {
     cidr_block = var.pub_rtb_cidr
     gateway_id = aws_internet_gateway.csnet_igw.id
   }
-
   tags = {
-    Name = var.public_rtb
+    Name = "${var.environment}-${var.public_rtb}"
   }
 }
 
@@ -109,7 +109,7 @@ resource "aws_internet_gateway" "csnet_igw" {
   vpc_id = aws_vpc.csnet_vpc.id
 
   tags = {
-    Name = var.csnet-igw
+    Name = "${var.environment}-${var.csnet-igw}"
   }
 }
 
@@ -118,7 +118,7 @@ resource "aws_eip" "csnet_eip" {
   domain   = var.csnet_eip
 
   tags = {
-    Name = var.csnet-eip
+    Name = "${var.environment}-${var.csnet-eip}"
   }
 }
 
@@ -128,7 +128,7 @@ resource "aws_nat_gateway" "csnet_ngw" {
   subnet_id     = aws_subnet.public_sub_1.id
 
   tags = {
-    Name = var.csnet-NAT
+    Name = "${var.environment}-${var.csnet-NAT}"
   }
 
   depends_on = [aws_internet_gateway.csnet_igw]

@@ -24,3 +24,7 @@ variable "domain_name" {
 variable "route53_record" {
   description = "List of Route 53 records with fqdn attribute"
 }
+
+variable "environment" {
+  description = "Name of the specific environment"
+}

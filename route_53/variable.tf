@@ -49,3 +49,6 @@ variable "time_to_live" {
   default = 60
 }
 
+variable "environment" {
+  description = "Name of the specific environment"
+}

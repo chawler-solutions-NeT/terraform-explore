@@ -97,3 +97,7 @@ variable "security_groups" {
 variable "key_pair" {
   description = "value of the keypair attached to the Instance"
 }
+
+variable "environment" {
+  description = "Name of the specific environment"
+}

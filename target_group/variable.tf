@@ -64,3 +64,7 @@ variable "http_port" {
 variable "vpc_id" {
   description = "VPC ID from the VPC module"
 }
+
+variable "environment" {
+  description = "Name of the specific environment"
+}
