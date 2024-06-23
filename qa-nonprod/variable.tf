@@ -23,5 +23,5 @@ variable "time_to_live" {
 
 variable "environment" {
   description = "Name of the specific environment"
+  default = "qa"
 }
-
