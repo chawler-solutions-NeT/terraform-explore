@@ -36,7 +36,7 @@ resource "aws_instance" "apache-server" {
 
 ############Creates a copy of the Instance AMI
 resource "aws_ami_from_instance" "apache_copy" {
-  name               = "apache-server-ami"
+  name               = var.instance_copy
   source_instance_id = aws_instance.apache-server.id
   snapshot_without_reboot = true
 

@@ -6,6 +6,7 @@ module "ec2_module" {
   key_name    = aws_key_pair.TF_key.key_name
   environment = "sand"
   ami         = "ami-0eaf7c3456e7b5b68"
+  instance_copy = "apache-server-ami"
 
 }
 

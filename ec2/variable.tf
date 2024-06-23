@@ -69,3 +69,7 @@ variable "key_name" {}
 variable "environment" {
   description = "Name of the specific environment"
 }
+
+variable "instance_copy" {
+    description = "Copy from EC2 instance"
+}
