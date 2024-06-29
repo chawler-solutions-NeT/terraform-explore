@@ -4,10 +4,11 @@
 #provisioner: file, remote-exec, local-exec (requires connection block)
 
 resource "aws_instance" "apache-server" {
+  count = var.index_count
   ami                             = var.ami
   instance_type                   = var.instance_type
   key_name                        = var.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
-  vpc_security_group_ids          = [aws_security_group.apache-server.id]
+  vpc_security_group_ids          = [aws_security_group.apache-server[0].id]
   associate_public_ip_address     = var.associate_public_ip
   subnet_id                       = var.public_sub1
   iam_instance_profile            = var.instance_profile
@@ -29,24 +30,32 @@ resource "aws_instance" "apache-server" {
         volume_type = var.block_type
     }
   tags = {
-    Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
-  }
-
+    Name = "${var.environment}-${var.instance_name[count.index]}",
+    Owner = "Devops",
+    Environment = "${var.environment}"
+    OS = "Linux"
 }
+
+
+    ##Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
+ 
+  }
 
 ############Creates a copy of the Instance AMI
-resource "aws_ami_from_instance" "apache_copy" {
-  name               = var.instance_copy
-  source_instance_id = aws_instance.apache-server.id
-  snapshot_without_reboot = true
+# resource "aws_ami_from_instance" "apache_copy" {
+#   count = 3
+#   name               = var.instance_copy
+#   source_instance_id = aws_instance.apache-server.id
+#   snapshot_without_reboot = true
 
-  tags = {
-    Name = "${var.environment}-apache-server-ami" // sand-apache-server-ami
-  }
-}
+#   tags = {
+#     Name = "${var.environment}-apache-server-ami" // sand-apache-server-ami
+#   }
+# }
 
 resource "aws_security_group" "apache-server" {
-  name        = var.apache_sg
+  count = var.index_count
+  name        = var.instance_name[count.index]
   description = "Allow inbound traffic and all outbound traffic to Apache Server"
   vpc_id      = var.vpc_id
 
@@ -71,14 +80,14 @@ resource "aws_security_group" "apache-server" {
   }
 
   tags = {
-    Name = "${var.environment}-${var.apache_sg}"
+    Name = "${var.environment}-${var.instance_name[count.index]}-sg"
   }
 }
 
 
 
 resource "aws_vpc_security_group_ingress_rule" "allow_https" {
-  security_group_id = aws_security_group.apache-server.id
+  security_group_id = aws_security_group.apache-server[0].id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   ip_protocol       = "tcp"
@@ -86,7 +95,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "http" {
-  security_group_id = aws_security_group.apache-server.id
+  security_group_id = aws_security_group.apache-server[0].id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
   ip_protocol       = "tcp"
@@ -96,7 +105,7 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
 
 
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
-  security_group_id = aws_security_group.apache-server.id
+  security_group_id = aws_security_group.apache-server[0].id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 22
   ip_protocol       = "tcp"
@@ -104,7 +113,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.apache-server.id
+  security_group_id = aws_security_group.apache-server[0].id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 
 }

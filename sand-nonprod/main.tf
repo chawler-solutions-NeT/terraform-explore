@@ -3,9 +3,10 @@ module "ec2_module" {
   vpc_id = module.vpc_module.vpc_id
   vpc_cidr_block = module.vpc_module.vpc_cidr_block
   public_sub1 = module.vpc_module.public_sub_1
-  key_name    = aws_key_pair.TF_key.key_name
+  key_name    = aws_key_pair.TF_key[0].key_name
   environment = "sand"
   ami         = "ami-0eaf7c3456e7b5b68"
+  index_count = 3
   instance_copy = "apache-server-ami"
 
 }
@@ -22,16 +23,19 @@ module "vpc_module" {
 
 # Creating key-pair on AWS using SSH-public key
 resource "aws_key_pair" "TF_key" {
-  key_name   = "${var.environment}-TF_key"
-  public_key =tls_private_key.rsa.public_key_openssh
+  key_name   = "${var.environment}-TF_key-${count.index}"
+  public_key =tls_private_key.rsa[0].public_key_openssh
+  count = var.key_count
 }
 
 resource "tls_private_key" "rsa" {
   algorithm = "RSA"
   rsa_bits  = 4096
+  count = var.key_count
 }
 
 resource "local_file" "TF-key" {
-  content  = tls_private_key.rsa.private_key_pem
+  content  = tls_private_key.rsa[0].private_key_pem
   filename = "${var.environment}-tfkey"
+  count = var.key_count
 }

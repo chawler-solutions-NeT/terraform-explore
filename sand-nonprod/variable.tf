@@ -26,3 +26,6 @@ variable "environment" {
   default = "sand"
 }
 
+variable "key_count" {
+  default = 3
+}
