@@ -1,14 +1,16 @@
 # boolean - condition for true or false
 # String - combination of alphanumeric characters deliminated with a double quote ""
-#Set of strings -  a group of strings deliminated with square brackets []
+#Set of strings -  a group of strings deliminated with
+# square brackets []
 #provisioner: file, remote-exec, local-exec (requires connection block)
 
 resource "aws_instance" "apache-server" {
-  count = length(local.instance_names)
+  //count = length(local.instance_names)
+  for_each                        = local.instance_names
   ami                             = var.ami
   instance_type                   = var.instance_type
   key_name                        = var.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
-  vpc_security_group_ids          = [aws_security_group.apache-server[0].id]
+  vpc_security_group_ids          = [aws_security_group.apache-server[each.key].id]
   associate_public_ip_address     = var.associate_public_ip
   subnet_id                       = var.public_sub1
   iam_instance_profile            = var.instance_profile
@@ -30,7 +32,7 @@ resource "aws_instance" "apache-server" {
         volume_type = var.block_type
     }
   tags = {
-    Name = "${var.environment}-${local.instance_names[count.index]}",
+    Name = "${var.environment}-${each.value}"
     Owner = "Devops",
     Environment = "${var.environment}"
     OS = "Linux"
@@ -54,8 +56,9 @@ resource "aws_instance" "apache-server" {
 # }
 
 resource "aws_security_group" "apache-server" {
-  count = length(local.instance_names)
-  name        = local.instance_names[count.index]
+  //count = length(local.instance_names)
+  for_each    = local.instance_names
+  name        = "${each.value}-sg"
   description = "Allow inbound traffic and all outbound traffic to Apache Server"
   vpc_id      = var.vpc_id
 
@@ -80,14 +83,15 @@ resource "aws_security_group" "apache-server" {
   }
 
   tags = {
-    Name = "${var.environment}-${local.instance_names[count.index]}-sg"
+    Name = "${var.environment}-${each.value}-sg"
   }
 }
 
 
 
 resource "aws_vpc_security_group_ingress_rule" "allow_https" {
-  security_group_id = aws_security_group.apache-server[0].id
+  for_each          = aws_security_group.apache-server
+  security_group_id = each.value.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   ip_protocol       = "tcp"
@@ -95,7 +99,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "http" {
-  security_group_id = aws_security_group.apache-server[0].id
+  for_each          = aws_security_group.apache-server
+  security_group_id = each.value.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
   ip_protocol       = "tcp"
@@ -105,7 +110,8 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
 
 
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
-  security_group_id = aws_security_group.apache-server[0].id
+  for_each    = aws_security_group.apache-server
+  security_group_id = each.value.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 22
   ip_protocol       = "tcp"
@@ -113,7 +119,8 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.apache-server[0].id
+  for_each    = aws_security_group.apache-server
+  security_group_id = each.value.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 
 }
