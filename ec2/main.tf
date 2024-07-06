@@ -4,7 +4,7 @@
 #provisioner: file, remote-exec, local-exec (requires connection block)
 
 resource "aws_instance" "apache-server" {
-  count = var.index_count
+  count = length(local.instance_names)
   ami                             = var.ami
   instance_type                   = var.instance_type
   key_name                        = var.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
@@ -30,7 +30,7 @@ resource "aws_instance" "apache-server" {
         volume_type = var.block_type
     }
   tags = {
-    Name = "${var.environment}-${var.instance_name[count.index]}",
+    Name = "${var.environment}-${local.instance_names[count.index]}",
     Owner = "Devops",
     Environment = "${var.environment}"
     OS = "Linux"
@@ -54,8 +54,8 @@ resource "aws_instance" "apache-server" {
 # }
 
 resource "aws_security_group" "apache-server" {
-  count = var.index_count
-  name        = var.instance_name[count.index]
+  count = length(local.instance_names)
+  name        = local.instance_names[count.index]
   description = "Allow inbound traffic and all outbound traffic to Apache Server"
   vpc_id      = var.vpc_id
 
@@ -80,7 +80,7 @@ resource "aws_security_group" "apache-server" {
   }
 
   tags = {
-    Name = "${var.environment}-${var.instance_name[count.index]}-sg"
+    Name = "${var.environment}-${local.instance_names[count.index]}-sg"
   }
 }
 

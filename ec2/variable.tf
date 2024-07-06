@@ -74,10 +74,10 @@ variable "instance_copy" {
     description = "Copy from EC2 instance"
 }
 
-variable "instance_name" {
-type = list(string)
-default = ["apache-server-instance", "ansible-instance", "devops-instance"]
-}
+# variable "instance_name" {
+# type = list(string)
+# default = ["apache-server-instance", "ansible-instance", "devops-instance"]
+# }
 
 variable "index_count" {
   description = "the number of instances"
