@@ -8,6 +8,7 @@ module "ec2_module" {
   ami         = "ami-0eaf7c3456e7b5b68"
   index_count = 3
   instance_copy = "apache-server-ami"
+  #user_data     = file(.../file)
 
 }
 

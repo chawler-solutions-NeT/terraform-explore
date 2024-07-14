@@ -14,6 +14,7 @@ resource "aws_instance" "apache-server" {
   associate_public_ip_address     = var.associate_public_ip
   subnet_id                       = var.public_sub1
   iam_instance_profile            = var.instance_profile
+  #user_data                       = var.user_data 
   instance_market_options {
     spot_options {
       max_price = 0.0400
