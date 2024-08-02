@@ -82,3 +82,7 @@ variable "instance_copy" {
 variable "index_count" {
   description = "the number of instances"
 }
+
+variable "user_data" {
+description = "scipt to be deployed on ansible"  
+}

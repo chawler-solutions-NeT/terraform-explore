@@ -14,7 +14,7 @@ resource "aws_instance" "apache-server" {
   associate_public_ip_address     = var.associate_public_ip
   subnet_id                       = var.public_sub1
   iam_instance_profile            = var.instance_profile
-  #user_data                       = var.user_data 
+  user_data                       = var.user_data
   instance_market_options {
     spot_options {
       max_price = 0.0400
@@ -43,6 +43,7 @@ resource "aws_instance" "apache-server" {
     ##Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
  
   }
+
 
 ############Creates a copy of the Instance AMI
 # resource "aws_ami_from_instance" "apache_copy" {
@@ -125,6 +126,3 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 
 }
-
-
-
