@@ -30,6 +30,6 @@ variable "key_count" {
   default = 3
 }
 
-variable "user_data" {
-description = "scipt to be deployed on ansible"  
-}
+# variable "user_data" {
+# description = "scipt to be deployed on ansible"  
+# }

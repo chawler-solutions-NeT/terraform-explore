@@ -32,14 +32,13 @@ resource "aws_instance" "apache-server" {
         volume_size = var.block_size
         volume_type = var.block_type
     }
+    
   tags = {
     Name = "${var.environment}-${each.value}"
     Owner = "Devops",
     Environment = "${var.environment}"
     OS = "Linux"
-}
-
-
+  }
     ##Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
  
   }
