@@ -40,6 +40,15 @@ resource "aws_instance" "apache-server" {
     OS = "Linux"
   }
     ##Name = "${var.environment}-${var.ec2_apache}" // dev-apache-server
+    # provisioner "file" {
+    # source	= var.source           
+    # destination	= var.destination
+    # }
+
+    # provisioner "file" {
+    # source	= var.key_source           
+    # destination	= var.key_destination
+    # }
  
   }
 
