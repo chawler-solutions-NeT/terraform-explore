@@ -6,15 +6,18 @@ module "ec2_module" {
   key_name    = aws_key_pair.TF_key[0].key_name
   environment = "sand"
   ami         = "ami-0eaf7c3456e7b5b68"
-  index_count = 3
+  index_count = 4
   instance_copy = "apache-server-ami"
   user_data     = file("${path.module}/project_inventory/ansible.sh")
   # source = 
   # destination = 
   # key_source = 
   # key_destination = 
+  depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key ]
 
 }
+
+
 
 module "vpc_module" {
   source = "../vpc"
