@@ -86,3 +86,7 @@ variable "index_count" {
 variable "user_data" {
 description = "scipt to be deployed on ansible"  
 }
+
+variable "vpc_security_group_ids" {
+  description = "Instance security group"
+}
