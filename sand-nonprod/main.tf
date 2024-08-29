@@ -11,7 +11,7 @@ module "ansible_module" {
   instance_copy = "ansible-server-ami"
   user_data     = file("${path.module}/project_inventory/ansible.sh")
   instance_name             = "ansible"
-  depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key ]
+  depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key, module.vpc_module ]
 
 
   tags = {
