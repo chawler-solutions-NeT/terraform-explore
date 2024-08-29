@@ -74,10 +74,9 @@ variable "instance_copy" {
     description = "Copy from EC2 instance"
 }
 
-# variable "instance_name" {
-# type = list(string)
-# default = ["apache-server-instance", "ansible-instance", "devops-instance"]
-# }
+variable "instance_name" {
+type = string
+}
 
 variable "index_count" {
   description = "the number of instances"
@@ -89,4 +88,8 @@ description = "scipt to be deployed on ansible"
 
 variable "vpc_security_group_ids" {
   description = "Instance security group"
+}
+
+variable "tags" {
+  type = map(string)
 }

@@ -4,9 +4,9 @@
 # square brackets []
 #provisioner: file, remote-exec, local-exec (requires connection block)
 
-resource "aws_instance" "apache-server" {
+resource "aws_instance" "ansible-server" {
   //count = length(local.instance_names)
-  for_each                        = local.instance_names
+  # for_each                        = local.instance_names
   ami                             = var.ami
   instance_type                   = var.instance_type
   key_name                        = var.key_name    //this is assumed that you have already created/uploaded you keypair to aws keypair
@@ -34,7 +34,7 @@ resource "aws_instance" "apache-server" {
     }
     
   tags = {
-    Name = "${var.environment}-${each.value}"
+    Name = "${var.environment}-${var.instance_name}"   ## assuming for_each option is in use ${var.environment}-${each.value}
     Owner = "Devops",
     Environment = "${var.environment}"
     OS = "Linux"

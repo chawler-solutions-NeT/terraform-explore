@@ -10,7 +10,13 @@ module "ansible_module" {
   index_count = 1
   instance_copy = "ansible-server-ami"
   user_data     = file("${path.module}/project_inventory/ansible.sh")
+  instance_name             = "ansible"
   depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key ]
+
+
+  tags = {
+    Environment = "sand"
+  }
 
 }
 
@@ -78,7 +84,7 @@ resource "aws_security_group" "ansible-server" {
     to_port          = 8085
     protocol         = "TCP"
     cidr_blocks      = ["0.0.0.0/0"]
-    # self              = true
+    self              = true
 
   }
 

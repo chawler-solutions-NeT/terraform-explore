@@ -10,7 +10,13 @@ module "jenkins_module" {
   index_count               = 1
   instance_copy             = "jenkins-server-ami"
   user_data                 = null
+  instance_name             = "jenkins"
   #depends_on = [ aws_ssm_parameter.jenkins_key, aws_ssm_parameter.jenkins_key ]
+
+
+  tags = {
+    Environment = "sand"
+  }
 
 }
 
@@ -38,7 +44,7 @@ resource "aws_security_group" "jenkins-server" {
     to_port          = 8085
     protocol         = "TCP"
     cidr_blocks      = ["0.0.0.0/0"]
-    # self              = true
+    self              = true
 
   }
 
@@ -49,7 +55,7 @@ resource "aws_security_group" "jenkins-server" {
 
 
 
-resource "aws_vpc_security_group_ingress_rule" "allow_https" {
+resource "aws_vpc_security_group_ingress_rule" "allow_https_jenkins" {
   security_group_id = aws_security_group.jenkins-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
@@ -57,7 +63,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https" {
   to_port           = 443
 }
 
-resource "aws_vpc_security_group_ingress_rule" "http" {
+resource "aws_vpc_security_group_ingress_rule" "http_jenkins" {
   security_group_id = aws_security_group.jenkins-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
@@ -67,7 +73,7 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
 
 
 
-resource "aws_vpc_security_group_ingress_rule" "ssh" {
+resource "aws_vpc_security_group_ingress_rule" "ssh_jenkins" {
   security_group_id = aws_security_group.jenkins-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 22
@@ -75,7 +81,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   to_port           = 22
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_jenkins" {
   security_group_id = aws_security_group.jenkins-server.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 
