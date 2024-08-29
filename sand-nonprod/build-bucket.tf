@@ -7,7 +7,8 @@ resource "aws_s3_object" "build" {
   key    = "project_inventory/inventory.py"  # Replace with the desired S3 key (path) for the file
   source = "${path.module}/project_inventory/inventory.py"  # Replace with the local path to the file
   acl    = "private"
-}
+  depends_on = [aws_s3_bucket.build]
+  }
 
 resource "aws_s3_bucket_acl" "build" {
   bucket = aws_s3_bucket.build.id
