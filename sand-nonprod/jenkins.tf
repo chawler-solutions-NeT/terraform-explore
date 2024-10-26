@@ -6,10 +6,11 @@ module "jenkins_module" {
   key_name                  = aws_key_pair.jenkins.key_name
   vpc_security_group_ids    = [aws_security_group.jenkins-server.id]
   environment               = "sand"
-  ami                       = "ami-0eaf7c3456e7b5b68"
+  ami                       = "ami-06b21ccaeff8cd686"
   index_count               = 1
   instance_copy             = "jenkins-server-ami"
-  user_data                 = null
+  user_data                 = file("${path.module}/project_inventory/jenkins.sh")
+  instance_type             = "t2.medium" 
   instance_name             = "jenkins"
   #depends_on = [ aws_ssm_parameter.jenkins_key, aws_ssm_parameter.jenkins_key ]
 

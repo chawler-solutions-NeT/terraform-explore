@@ -9,8 +9,9 @@ module "tomcat_module" {
   ami                       = "ami-0eaf7c3456e7b5b68"
   index_count               = 1
   instance_copy             = "tomcat-server-ami"
-  user_data                 = null
+  user_data                 = file("${path.module}/project_inventory/tomcat.sh")
   instance_name             = "tomcat"
+  instance_type             = "t2.medium" 
   #depends_on = [ aws_ssm_parameter.tomcat_key, aws_ssm_parameter.tomcat_key ]
 
 
