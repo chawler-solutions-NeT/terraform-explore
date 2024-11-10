@@ -14,4 +14,6 @@ resource "aws_autoscaling_group" "worker_asg" {
     value               = "swarm-worker"
     propagate_at_launch = true
   }
+
+  depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
 }

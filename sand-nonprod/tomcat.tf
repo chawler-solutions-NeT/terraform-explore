@@ -12,7 +12,7 @@ module "tomcat_module" {
   user_data                 = file("${path.module}/project_inventory/tomcat.sh")
   instance_name             = "tomcat"
   instance_type             = "t2.medium" 
-  #depends_on = [ aws_ssm_parameter.tomcat_key, aws_ssm_parameter.tomcat_key ]
+  depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
 
 
   tags = {

@@ -9,9 +9,9 @@ module "docker_module" {
   ami                       = "ami-0eaf7c3456e7b5b68"
   index_count               = 1
   instance_copy             = "docker-server-ami"
-  user_data                 = null
+  user_data                 = file("${path.module}/project_inventory/docker.sh")
   instance_name             = "docker"
-  #depends_on = [ aws_ssm_parameter.docker_key, aws_ssm_parameter.docker_key ]
+  depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
 
   tags = {
     Environment = "sand"

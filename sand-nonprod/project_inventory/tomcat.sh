@@ -49,3 +49,6 @@ WantedBy=multi-user.target
 sudo systemctl start tomcat
 # # Enable the Tomcat service to start on boot
 sudo systemctl enable tomcat
+sleep 60
+PUBLIC_KEY=$(aws ssm get-parameter --name /sand/public_key --with-decryption --query "Parameter.Value" --output text --region us-east-1)
+echo $PUBLIC_KEY | sudo tee -a ~/.ssh/authorized_keys > /dev/null

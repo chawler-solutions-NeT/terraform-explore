@@ -12,7 +12,7 @@ module "jenkins_module" {
   user_data                 = file("${path.module}/project_inventory/jenkins.sh")
   instance_type             = "t2.medium" 
   instance_name             = "jenkins"
-  #depends_on = [ aws_ssm_parameter.jenkins_key, aws_ssm_parameter.jenkins_key ]
+  depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
 
 
   tags = {
