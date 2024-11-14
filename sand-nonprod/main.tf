@@ -9,7 +9,9 @@ module "ansible_module" {
   vpc_security_group_ids = [aws_security_group.ansible-server.id]
   index_count = 1
   instance_copy = "ansible-server-ami"
-  user_data     = file("${path.module}/project_inventory/ansible.sh")
+  user_data     = templatefile("${path.module}/project_inventory/ansible.sh", {
+    environment = "sand"
+  })
   instance_name             = "ansible"
   depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key, module.vpc_module ]
 

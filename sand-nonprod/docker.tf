@@ -11,6 +11,7 @@ module "docker_module" {
   instance_copy             = "docker-server-ami"
   user_data                 = file("${path.module}/project_inventory/docker.sh")
   instance_name             = "docker"
+  instance_type             = "t2.medium" 
   depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
 
   tags = {

@@ -29,11 +29,11 @@ variable "key_count" {
 # }
 #########################################
 variable "manager_count" {
-  default = 3
+  default = 1
 }
 
 variable "worker_count" {
-  default = 6
+  default = 2
 }
 
 variable "ami_id" {
