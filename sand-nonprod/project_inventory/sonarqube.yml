@@ -1,0 +1,237 @@
+---
+- name: Install and Configure SonarQube with PostgreSQL
+  hosts: all
+  become: true
+  vars:
+    postgresql_version: "10"
+    sonarqube_version: "9.9.3.79811"
+    sonarqube_user: "sonar"
+    sonarqube_db_password: "sonar"
+    sonarqube_home: "/opt/sonarqube"
+    sonarqube_download_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
+
+  tasks:
+    - name: Install EPEL repository from Amazon Linux Extras
+      command: amazon-linux-extras install epel -y
+      become: yes
+
+    - name: Install Amazon Corretto 17 Headless
+      yum:
+        name: java-17-amazon-corretto-headless
+        state: present
+
+    - name: Install PostgreSQL 10 on Amazon Linux
+      command: amazon-linux-extras install postgresql{{ postgresql_version }} -y
+
+    - name: Install Python 3
+      yum:
+        name:
+          - python
+          - python-pip
+        state: present
+
+
+    - name: Install Python psycopg2-binary package (required by Ansible PostgreSQL modules)
+      command: pip install psycopg2-binary
+
+    - name: Install PostgreSQL Server and Development Tools
+      yum:
+        name:
+          - postgresql-server
+          - postgresql-devel
+        state: present
+
+    - name: Initialize PostgreSQL Database
+      become: true
+      become_user: root
+      command: /usr/bin/postgresql-setup --initdb
+      ignore_errors: true
+
+    - name: Start PostgreSQL Service
+      systemd:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Create PostgreSQL User and Database
+      become: true
+      become_user: postgres
+      block:
+        - name: Create user
+          postgresql_user:
+            db: postgres
+            name: "{{ sonarqube_user }}"
+            password: "{{ sonarqube_db_password }}"
+            encrypted: yes
+
+        - name: Create database
+          postgresql_db:
+            name: sonarqube
+            owner: "{{ sonarqube_user }}"
+
+        - name: Grant privileges
+          postgresql_privs:
+            db: sonarqube
+            roles: "{{ sonarqube_user }}"
+            objs: ALL_IN_SCHEMA
+            privs: ALL
+
+    - name: Locate pg_hba.conf Configuration File
+      become: true
+      become_user: postgres
+      command: psql -c 'SHOW hba_file;'
+      register: pg_hba_file_path
+
+    - name: Empty pg_hba.conf file
+      copy:
+        dest: "{{ pg_hba_file_path.stdout_lines[2].strip() }}"
+        content: ''
+        mode: '0644'
+      become: true
+      become_user: postgres
+
+    - name: Update pg_hba.conf Configuration
+      lineinfile:
+        path: "{{ pg_hba_file_path.stdout_lines[2].strip() }}"
+        line: "{{ item }}"
+        create: yes
+      loop:
+        - "local   all     {{ sonarqube_user }}   md5"
+        - "local   all     all     peer"
+        - "host    all     all     127.0.0.1/32    md5"
+        - "host    all     all     ::1/128         md5"
+      become: true
+      become_user: postgres
+
+    - name: Restart PostgreSQL Service
+      systemd:
+        name: postgresql
+        state: restarted
+
+    - name: Create Sonar User and Group
+      block:
+        - name: Create group 'sonar'
+          group:
+            name: sonar
+            state: present
+
+        - name: Create user 'sonar'
+          user:
+            name: "{{ sonarqube_user }}"
+            group: sonar
+            home: "{{ sonarqube_home }}"
+            shell: /bin/bash
+
+    - name: Download and Unzip SonarQube
+      unarchive:
+        src: "{{ sonarqube_download_url }}"
+        dest: /opt/
+        remote_src: yes
+
+    - name: Move SonarQube to the target directory
+      shell: sudo cp -r /opt/sonarqube-{{ sonarqube_version }}/* {{ sonarqube_home }}/
+      args:
+        executable: /bin/bash
+          #when: unzip_sonarqube is changed
+
+    - name: Cleanup unzipped directory
+      file:
+        path: "/opt/sonarqube-{{ sonarqube_version }}"
+        state: absent
+
+    - name: Set Ownership and Permissions for SonarQube
+      file:
+        path: "{{ sonarqube_home }}"
+        owner: "{{ sonarqube_user }}"
+        group: "{{ sonarqube_user }}"
+        mode: '0775'
+        recurse: yes
+
+    # Configure sonar.sh
+    - name: Configure sonar.sh
+      lineinfile:
+        path: "{{ sonarqube_home }}/bin/linux-x86-64/sonar.sh"
+        regexp: '^#RUN_AS_USER='
+        line: 'RUN_AS_USER={{ sonarqube_user }}'
+
+    # Configure sonar.properties
+    - name: Configure sonar.properties
+      blockinfile:
+        path: "{{ sonarqube_home }}/conf/sonar.properties"
+        block: |
+          sonar.jdbc.username={{ sonarqube_user }}
+          sonar.jdbc.password={{ sonarqube_db_password }}
+          sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube
+          sonar.web.javaOpts=-Djava.net.preferIPv4Stack=true
+          sonar.web.javaAdditionalOpts=-server
+          sonar.web.host=0.0.0.0
+
+    # System Configuration
+    - name: Update System Configuration
+      blockinfile:
+        path: /etc/sysctl.conf
+        block: |
+          vm.max_map_count=262144
+      notify:
+        - reload sysctl
+
+    - name: Update File Limits for Elasticsearch
+      blockinfile:
+        path: /etc/security/limits.conf
+        block: |
+          * soft nofile 65536
+          * hard nofile 65536
+          elasticsearch soft nofile 65536
+          elasticsearch hard nofile 65536
+          elasticsearch memlock unlimited
+
+    - name: Update systemd Configuration
+      blockinfile:
+        path: "{{ item }}"
+        block: |
+          DefaultLimitNOFILE=65536
+      with_items:
+        - /etc/systemd/system.conf
+        - /etc/systemd/user.conf
+      notify:
+        - restart systemd
+
+    - name: Create SonarQube service file
+      copy:
+        dest: "/etc/systemd/system/sonarqube.service"
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=SonarQube service
+          After=syslog.target network.target
+
+          [Service]
+          Type=forking
+          ExecStart={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh start
+          ExecStop={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh stop
+          User={{ sonarqube_user }}
+          LimitNOFILE=65536
+          LimitNPROC=4096
+          TimeoutStartSec=5
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: restart systemd
+
+    - name: Enable and start SonarQube service
+      systemd:
+        name: sonarqube
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+  handlers:
+    - name: reload sysctl
+      command: sysctl -p
+
+    - name: restart systemd
+      systemd:
+        name: sonarqube
+        daemon_reload: yes
+        state: restarted

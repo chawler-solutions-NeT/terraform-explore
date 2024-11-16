@@ -13,11 +13,18 @@ sudo sed -i 's/#host_key_checking = False/host_key_checking = False/g' /etc/ansi
 (crontab -l; echo "* * * * * /usr/bin/python3 /tmp/class26/inventory.py") | crontab -
 sleep 120
 # Try to fetch the public key from SSM and add it to authorized_keys
-PRIVATE_KEY=$(aws ssm get-parameter --name /sand/private_key --with-decryption --query "Parameter.Value" --output text --region us-east-1)
-if [ -n "$PRIVATE_KEY" ]; then
-    echo "$PRIVATE_KEY" | sudo tee -a /home/ec2-user/.ssh/private_key.pem > /dev/null
-    sudo chmod 600 ~/.ssh/private_key.pem
-    echo "Private key added successfully..."
-else
-    echo "Failed to retrieve private key from SSM. Check the SSM parameter and instance permissions."
+for i in {1..5}; do
+    PUBLIC_KEY=$(aws ssm get-parameter --name /sand/public_key --with-decryption --query "Parameter.Value" --output text --region us-east-1 2>/dev/null)
+    if [ -n "$PUBLIC_KEY" ]; then
+        echo "$PUBLIC_KEY" | sudo tee -a /home/ec2-user/.ssh/authorized_keys > /dev/null
+        echo "Public key added successfully to authorized_keys."
+        break
+    else
+        echo "Attempt $i: Failed to retrieve public key"
+        sleep 30
+    fi
+done
+
+if [ -z "$PUBLIC_KEY" ]; then
+    echo "Failed to retrieve public key"
 fi

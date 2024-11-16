@@ -1,0 +1,119 @@
+---
+- name: Install and Configure Nexus Repository Manager
+  hosts: all
+  become: true
+
+  vars:
+    java_version: "java-11-amazon-corretto-headless"
+    nexus_url: "https://download.sonatype.com/nexus/3/latest-unix.tar.gz"
+    nexus_install_dir: "/opt/nexus"
+    nexus_user: "nexus"
+    sonatype_work_dir: "/opt/nexus/sonatype-work"
+
+  tasks:
+    - name: Install Java OpenJDK
+      yum:
+        name: "{{ java_version }}"
+        state: present
+
+    - name: Create Nexus installation directory
+      file:
+        path: "{{ nexus_install_dir }}"
+        state: directory
+
+    - name: Download and Extract Nexus Repository Manager
+      unarchive:
+        src: "{{ nexus_url }}"
+        dest: "{{ nexus_install_dir }}"
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      register: nexus_extract
+
+    - name: Create nexus user
+      user:
+        name: "{{ nexus_user }}"
+        system: yes
+
+    - name: Set Ownership and Permissions for Nexus
+      file:
+        path: "{{ nexus_install_dir }}"
+        owner: "{{ nexus_user }}"
+        group: "{{ nexus_user }}"
+        mode: '0775'
+        recurse: yes
+
+    - name: Create Nexus service file
+      copy:
+        dest: "/etc/systemd/system/nexus.service"
+        content: |
+          [Unit]
+          Description=Nexus Repository Manager
+          After=network.target
+
+          [Service]
+          Type=forking
+          LimitNOFILE=65536
+          ExecStart={{ nexus_install_dir }}/bin/nexus start
+          ExecStop={{ nexus_install_dir }}/bin/nexus stop
+          User={{ nexus_user }}
+          WorkingDirectory={{ nexus_install_dir }}
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+        mode: '0644'
+
+    - name: Create sonatype-work directory
+      file:
+        path: "{{ sonatype_work_dir }}"
+        state: directory
+        owner: "{{ nexus_user }}"
+        group: "{{ nexus_user }}"
+        mode: '0775'
+
+    - name: Update vmoptions - Set karaf.data
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.vmoptions"
+        regexp: '^-Dkaraf.data=.*'
+        line: '-Dkaraf.data={{ sonatype_work_dir }}/nexus3'
+        state: present
+
+    - name: Update vmoptions - Set karaf.log
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.vmoptions"
+        regexp: '^-Dkaraf.log=.*'
+        line: '-Dkaraf.log={{ sonatype_work_dir }}/nexus3/log'
+        state: present
+
+    - name: Update vmoptions - Set java.io.tmpdir
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.vmoptions"
+        regexp: '^-Djava.io.tmpdir=.*'
+        line: '-Djava.io.tmpdir={{ sonatype_work_dir }}/nexus3/tmp'
+        state: present
+
+    - name: Update vmoptions - Set LogFile path
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.vmoptions"
+        regexp: '^-XX:LogFile=.*'
+        line: '-XX:LogFile={{ sonatype_work_dir }}/nexus3/log/jvm.log'
+        state: present
+
+    - name: Update vmoptions - Set nexus-work
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.vmoptions"
+        regexp: '^-Dnexus-work=.*'
+        line: '-Dnexus-work={{ sonatype_work_dir }}'
+        state: present
+
+    - name: Set run_as_user in nexus.rc
+      lineinfile:
+        path: "{{ nexus_install_dir }}/bin/nexus.rc"
+        line: 'run_as_user="{{ nexus_user }}"'
+
+    - name: Reload systemd and start Nexus service
+      systemd:
+        name: nexus
+        state: started
+        enabled: yes
+        daemon_reload: yes
