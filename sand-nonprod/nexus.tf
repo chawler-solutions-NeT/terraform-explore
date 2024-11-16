@@ -9,7 +9,7 @@ module "nexus_module" {
   ami                       = "ami-0eaf7c3456e7b5b68"
   index_count               = 1
   instance_copy             = "nexus-server-ami"
-  user_data                 = null
+  user_data                 = templatefile("${path.module}/project_inventory/retrievePublicKey.tpl", {})
   instance_name             = "nexus"
   instance_type             = "t2.medium" 
   depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
@@ -39,7 +39,7 @@ resource "aws_security_group" "nexus-server" {
   }
 
   ingress {
-    description      = "HTTP Port"
+    description      = "HTTP_nexus Port"
     from_port        = 8080
     to_port          = 8085
     protocol         = "TCP"
@@ -53,7 +53,7 @@ resource "aws_security_group" "nexus-server" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_https" {
+resource "aws_vpc_security_group_ingress_rule" "allow_http_nexus" {
   security_group_id = aws_security_group.nexus-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
@@ -61,7 +61,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https" {
   to_port           = 443
 }
 
-resource "aws_vpc_security_group_ingress_rule" "http" {
+resource "aws_vpc_security_group_ingress_rule" "http_nexus" {
   security_group_id = aws_security_group.nexus-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
@@ -71,7 +71,7 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
 
 
 
-resource "aws_vpc_security_group_ingress_rule" "ssh" {
+resource "aws_vpc_security_group_ingress_rule" "ssh_nexus" {
   security_group_id = aws_security_group.nexus-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 22
@@ -79,7 +79,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   to_port           = 22
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_nexus" {
   security_group_id = aws_security_group.nexus-server.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 

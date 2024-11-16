@@ -9,7 +9,7 @@ module "sonarqube_module" {
   ami                       = "ami-0eaf7c3456e7b5b68"
   index_count               = 1
   instance_copy             = "sonarqube-server-ami"
-  user_data                 = null
+  user_data                 = templatefile("${path.module}/project_inventory/retrievePublicKey.tpl", {})
   instance_name             = "sonarqube"
   instance_type             = "t2.medium" 
   depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
@@ -53,7 +53,7 @@ resource "aws_security_group" "sonarqube-server" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_https" {
+resource "aws_vpc_security_group_ingress_rule" "allow_https_sonar" {
   security_group_id = aws_security_group.sonarqube-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
@@ -61,7 +61,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https" {
   to_port           = 443
 }
 
-resource "aws_vpc_security_group_ingress_rule" "http" {
+resource "aws_vpc_security_group_ingress_rule" "http_sonar" {
   security_group_id = aws_security_group.sonarqube-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
@@ -71,7 +71,7 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
 
 
 
-resource "aws_vpc_security_group_ingress_rule" "ssh" {
+resource "aws_vpc_security_group_ingress_rule" "ssh_sonar" {
   security_group_id = aws_security_group.sonarqube-server.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 22
@@ -79,7 +79,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   to_port           = 22
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_sonar" {
   security_group_id = aws_security_group.sonarqube-server.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" 
