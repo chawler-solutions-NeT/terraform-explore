@@ -14,14 +14,16 @@ module "ansible_module" {
   })
   instance_name             = "ansible"
   depends_on = [ aws_ssm_parameter.private_key, aws_ssm_parameter.public_key, module.vpc_module ]
-
+  
 
   tags = {
     Environment = "sand"
   }
-
+  
+  # lifecycle {
+  #   ignore_changes = all
+  # }
 }
-
 
 
 module "vpc_module" {

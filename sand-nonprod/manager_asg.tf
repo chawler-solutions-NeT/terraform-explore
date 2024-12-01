@@ -15,5 +15,5 @@ resource "aws_autoscaling_group" "manager_asg" {
     propagate_at_launch = true
   }
 
-  depends_on = [ aws_ssm_parameter.public_key, module.ansible_module ]
+  depends_on = [ aws_ssm_parameter.public_key ]
 }

@@ -15,12 +15,12 @@ resource "aws_instance" "ansible-server" {
   subnet_id                       = var.public_sub1
   iam_instance_profile            = var.instance_profile
   user_data                       = var.user_data != "" ? var.user_data : null
-  instance_market_options {
-    spot_options {
-      max_price = 0.0400
-    }
-    market_type = var.ec2_market_type
-  }
+  # instance_market_options {
+  #   spot_options {
+  #     max_price = 0.0400
+  #   }
+  #   market_type = var.ec2_market_type
+  # }
     ebs_block_device {
         device_name = "/dev/sdf"
         delete_on_termination = true
@@ -49,7 +49,10 @@ resource "aws_instance" "ansible-server" {
     # source	= var.key_source           
     # destination	= var.key_destination
     # }
- 
+
+      lifecycle {
+    ignore_changes = all
+    }
   }
 
 

@@ -7,10 +7,10 @@ sudo groupadd --system tomcat
 sudo useradd -d /usr/share/tomcat -r -s /bin/false -g tomcat tomcat
 sudo yum install wget git maven -y
 cd /opt
-sudo wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.96/bin/apache-tomcat-9.0.96.tar.gz
-sudo tar -xvf apache-tomcat-9.0.96.tar.gz
-sudo mv apache-tomcat-9.0.96 tomcat9
-sudo rm -rf apache-tomcat-9.0.96.tar.gz
+sudo wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.97/bin/apache-tomcat-9.0.97.tar.gz
+sudo tar -xvf apache-tomcat-9.0.97.tar.gz
+sudo mv apache-tomcat-9.0.97 tomcat9
+sudo rm -rf apache-tomcat-9.0.97.tar.gz
 sudo chown -R tomcat:tomcat /opt/tomcat9
 sed -i.bak '/<Valve className="org.apache.catalina.valves.RemoteAddrValve"/ s/^/<!-- /; /0:0:0:0:0:0:0:1" \/>/ s/$/ -->/' /opt/tomcat9/webapps/manager/META-INF/context.xml
 sed -i.bak '/<Valve className="org.apache.catalina.valves.RemoteAddrValve"/ s/^/<!-- /; /0:0:0:0:0:0:0:1" \/>/ s/$/ -->/' /opt/tomcat9/webapps/host-manager/META-INF/context.xml

@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    java_version: "java-11-amazon-corretto-headless"
+    java_version: "java-17-amazon-corretto-headless"
     nexus_url: "https://download.sonatype.com/nexus/3/latest-unix.tar.gz"
     nexus_install_dir: "/opt/nexus"
     nexus_user: "nexus"

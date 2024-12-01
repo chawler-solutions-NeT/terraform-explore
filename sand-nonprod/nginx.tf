@@ -9,7 +9,7 @@ module "nginx_module" {
   ami                       = "ami-0eaf7c3456e7b5b68"
   index_count               = 1
   instance_copy             = "nginx-server-ami"
-  user_data                 = null
+  user_data                 = templatefile("${path.module}/project_inventory/retrievePublicKey.tpl", {})
   instance_name             = "nginx"
   #depends_on = [ aws_ssm_parameter.nginx_key, aws_ssm_parameter.nginx_key ]
 

@@ -41,7 +41,7 @@ resource "aws_security_group" "sonarqube-server" {
   ingress {
     description      = "HTTP Port"
     from_port        = 8080
-    to_port          = 8085
+    to_port          = 9000
     protocol         = "TCP"
     cidr_blocks      = ["0.0.0.0/0"]
     self              = true

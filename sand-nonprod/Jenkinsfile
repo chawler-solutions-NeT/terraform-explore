@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['Plan Only', 'Plan and Apply', 'Destroy Only'],
+            description: 'Select the Terraform action to perform'
+        )
+        string(
+            name: 'BRANCH',
+            defaultValue: 'feat/swarm_cluster',
+            description: 'Enter the branch to use for Terraform actions'
+        )
+    }
+
+    environment {
+        TF_WORKSPACE = 'default'
+    }
+
+    tools {
+        terraform 'terraform'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                script {
+                    echo "Checking out branch: ${params.BRANCH}"
+                    checkout scm: [
+                        $class: 'GitSCM', 
+                        branches: [[name: "*/${params.BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/chawler-solutions-NeT/terraform-explore.git',
+                            credentialsId: 'chaw_id' // Using your provided credentials ID
+                        ]]
+                    ]
+                }
+            }
+        }
+
+        stage('Setup') {
+            steps {
+                script {
+                    echo "Selected Action: ${params.ACTION}"
+                    echo "Selected Branch: ${params.BRANCH}"
+                }
+            }
+        }
+
+        stage('Setup Terraform Environment') {
+            steps {
+                dir('terraform-explore/sand-nonprod') { // Change directory
+                    script {
+                        echo "Setting up Terraform environment"
+                        sh '''
+                        terraform version
+                        terraform init
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            when {
+                expression { params.ACTION == 'Plan Only' || params.ACTION == 'Plan and Apply' || params.ACTION == 'Destroy Only' }
+            }
+            steps {
+                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
+                    script {
+                        sh '''
+                        terraform plan
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression { params.ACTION == 'Plan and Apply' }
+            }
+            steps {
+                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
+                    script {
+                        input(message: "Do you want to proceed with Apply?", ok: "Apply")
+                        sh '''
+                        terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Destroy') {
+            when {
+                expression { params.ACTION == 'Destroy Only' }
+            }
+            steps {
+                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
+                    script {
+                        input(message: "Do you want to proceed with Destroy?", ok: "Destroy")
+                        sh '''
+                        terraform destroy -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'Terraform actions completed successfully.'
+        }
+        failure {
+            echo 'Terraform actions failed. Check the logs for more details.'
+        }
+    }
+}
