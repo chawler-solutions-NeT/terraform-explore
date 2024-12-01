@@ -32,31 +32,24 @@ pipeline {
                         branches: [[name: "*/${params.BRANCH}"]],
                         userRemoteConfigs: [[
                             url: 'https://github.com/chawler-solutions-NeT/terraform-explore.git',
-                            credentialsId: 'chaw_id' // Using your provided credentials ID
+                            credentialsId: 'chaw_id'
                         ]]
                     ]
                 }
             }
         }
 
-        stage('Setup') {
-            steps {
-                script {
-                    echo "Selected Action: ${params.ACTION}"
-                    echo "Selected Branch: ${params.BRANCH}"
-                }
-            }
-        }
-
         stage('Setup Terraform Environment') {
             steps {
-                dir('terraform-explore/sand-nonprod') { // Change directory
-                    script {
-                        echo "Setting up Terraform environment"
-                        sh '''
-                        terraform version
-                        terraform init
-                        '''
+                withCredentials([aws(credentialsId: 'aws-credentials', region: 'us-east-1')]) {
+                    dir("${env.WORKSPACE}/sand-nonprod") { 
+                        script {
+                            echo "Setting up Terraform environment"
+                            sh '''
+                            terraform version | sed -E "s/\\x1b\\[[0-9;]*m//g"
+                            terraform init | sed -E "s/\\x1b\\[[0-9;]*m//g"
+                            '''
+                        }
                     }
                 }
             }
@@ -67,11 +60,14 @@ pipeline {
                 expression { params.ACTION == 'Plan Only' || params.ACTION == 'Plan and Apply' || params.ACTION == 'Destroy Only' }
             }
             steps {
-                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
-                    script {
-                        sh '''
-                        terraform plan
-                        '''
+                withCredentials([aws(credentialsId: 'aws-credentials', region: 'us-east-1')]) {
+                    dir("${env.WORKSPACE}/sand-nonprod") {
+                        script {
+                            echo "Running Terraform Plan"
+                            sh '''
+                            terraform plan | sed -E "s/\\x1b\\[[0-9;]*m//g"
+                            '''
+                        }
                     }
                 }
             }
@@ -82,12 +78,14 @@ pipeline {
                 expression { params.ACTION == 'Plan and Apply' }
             }
             steps {
-                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
-                    script {
-                        input(message: "Do you want to proceed with Apply?", ok: "Apply")
-                        sh '''
-                        terraform apply -auto-approve
-                        '''
+                withCredentials([aws(credentialsId: 'aws-credentials', region: 'us-east-1')]) {
+                    dir("${env.WORKSPACE}/sand-nonprod") {
+                        script {
+                            input(message: "Do you want to proceed with Apply?", ok: "Apply")
+                            sh '''
+                            terraform apply -auto-approve | sed -E "s/\\x1b\\[[0-9;]*m//g"
+                            '''
+                        }
                     }
                 }
             }
@@ -98,12 +96,14 @@ pipeline {
                 expression { params.ACTION == 'Destroy Only' }
             }
             steps {
-                dir('$WORKSPACE/terraform-explore/sand-nonprod') { // Change directory
-                    script {
-                        input(message: "Do you want to proceed with Destroy?", ok: "Destroy")
-                        sh '''
-                        terraform destroy -auto-approve
-                        '''
+                withCredentials([aws(credentialsId: 'aws-credentials', region: 'us-east-1')]) {
+                    dir("${env.WORKSPACE}/sand-nonprod") {
+                        script {
+                            input(message: "Do you want to proceed with Destroy?", ok: "Destroy")
+                            sh '''
+                            terraform destroy -auto-approve | sed -E "s/\\x1b\\[[0-9;]*m//g"
+                            '''
+                        }
                     }
                 }
             }
