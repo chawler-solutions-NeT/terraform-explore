@@ -1,0 +1,111 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+    }
+    
+    environment {
+        NEXUS_VERSION = "nexus3"
+        NEXUS_PROTOCOL = "http"
+        NEXUS_URL = "44.200.108.88:8081"
+        NEXUS_REPOSITORY = "petcare-artifacts"
+        NEXUS_CREDENTIAL_ID = 'nexus_id'
+    }
+    
+    stages {
+        stage('Checkout code from GitHUB') {
+            steps {
+                git branch: 'check', changelog: false, url: 'https://github.com/chawler-solutions-NeT/petadoption-springboot.git'
+            }
+        }
+        
+        stage('Build Artifact') {
+            steps {
+                sh '''
+                mvn clean install -Dcheckstyle.skip -Dmaven.test.skip=true
+                '''
+            }
+        }
+        
+        stage('SonarQube Scan') {
+            steps{
+                withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar_id') {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=petcare -X'
+                }
+            }
+        }
+        
+        stage('SonarQualityQate') {
+            steps {
+                sleep(10)
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_id'
+                }
+            }
+        }
+        
+        stage('Publish to Nexus') {
+            steps {
+                script {
+                    // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
+                    pom = readMavenPom file: "pom.xml";
+                    // Find built artifact under target folder
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    // Print some info from the artifact found
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    // Extract the path from the File found
+                    artifactPath = filesByGlob[0].path;
+                    // Assign to a boolean response verifying If the artifact name exists
+                    artifactExists = fileExists artifactPath;
+
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                // Artifact generated such as .jar, .ear and .war files.
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging]
+                            ]
+                        );
+
+                    } else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to Container') {
+            steps {
+                script {
+                    deploy adapters: [tomcat9(credentialsId: 'tomcat_id', path: '', url: 'http://44.193.211.74:8085/')], contextPath: null, war: '**/*.war'
+                }
+            }
+        }
+        
+        stage ('Run Application in Container') {
+            steps{
+                sh 'screen -dmS petadoption sudo java -jar /opt/tomcat9/webapps/spring-petclinic-2.4.2.war &'
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    }
+}
